@@ -1,6 +1,7 @@
-"use client"
+"use client";
 import NewDatasourceButton from "@/components/ui/NewDatasourceButton";
 import supabase from "@/utils/supabase/client";
+import { useState } from "react";
 
 const connectors = [
   {
@@ -34,36 +35,31 @@ const connectors = [
 ];
 
 export default function DatasourcesPage() {
+  const handleGoogleSignIn = async () => {
+    let { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
+      },
+    });
 
-    const handleGoogleSignIn = async () => {
-        let { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            queryParams: {
-              access_type: 'offline',
-              prompt: 'consent',
-            },
-          },
-        });
-    
-        if (error) {
-          console.error('Error signing in', error);
-          return;
-        }
-    
-        // Handle the success state
-        console.log('Successfully signed in!', );
-      };
+    if (error) {
+      console.error("Error signing in", error);
+      return;
+    }
+
+    // Handle the success state
+    console.log("Successfully signed in!");
+  };
 
   return (
-    <div className="grid grid-rows-2 grid-cols-3 gap-4">
-        <button onClick={handleGoogleSignIn}></button>
-      <NewDatasourceButton />
-      {/* <NewDatasourceButton />
-      <NewDatasourceButton />
-      <NewDatasourceButton />
-      <NewDatasourceButton />
-      <NewDatasourceButton /> */}
+    <div className="flex items-center justify-center">
+      <div className="max-w-lg pt-24 lg:pt-12">
+        <NewDatasourceButton />
+      </div>
     </div>
   );
 }
