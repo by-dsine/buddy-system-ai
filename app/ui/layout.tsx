@@ -1,10 +1,7 @@
 "use client";
 import { Fragment, useState } from "react";
 import { Menu, Transition } from "@headlessui/react";
-import {
-  Bars3Icon,
-  BellIcon,
-} from "@heroicons/react/24/outline";
+import { Bars3Icon, BellIcon } from "@heroicons/react/24/outline";
 import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
@@ -128,7 +125,14 @@ export default function UILayout({ children }: { children: React.ReactNode }) {
           </div>
 
           <main className="py-10">
-            <div className="px-4 sm:px-6 lg:px-8">{children}</div>
+            <div className="px-4 sm:px-6 lg:px-8">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                  Page Title
+                </h2>
+              </div>
+              {children}
+            </div>
           </main>
         </div>
       </div>

@@ -11,7 +11,9 @@
     "@supabase/ssr": "latest",
     "@supabase/supabase-js": "latest",
     "autoprefixer": "10.4.17",
+    "gapi-script": "^1.2.0",
     "geist": "^1.2.1",
+    "googleapis": "^131.0.0",
     "next": "latest",
     "postcss": "8.4.33",
     "react": "18.2.0",
@@ -23,6 +25,7 @@
     "@types/node": "20.11.5",
     "@types/react": "18.2.48",
     "@types/react-dom": "18.2.18",
-    "encoding": "^0.1.13"
+    "encoding": "^0.1.13",
+    "supabase": "^1.136.3"
   }
 }

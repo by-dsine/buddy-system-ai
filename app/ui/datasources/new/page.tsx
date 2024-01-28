@@ -1,7 +1,9 @@
 "use client";
 import NewDatasourceButton from "@/components/ui/NewDatasourceButton";
 import supabase from "@/utils/supabase/client";
-import { useState } from "react";
+import { Session } from "@supabase/supabase-js";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const connectors = [
   {
@@ -38,6 +40,82 @@ const connectors = [
 
 export default function NewDatasourcesPage() {
   const [connector, setConnector] = useState(connectors[0]);
+  const pathname = usePathname();
+  console.log("Pathname: " + pathname);
+
+  useEffect(() => {
+    const getSession = async () => {
+      const { data: session, error } = await supabase.auth.getSession();
+
+      if (error) {
+        console.log("Error fetching session... ", error);
+        return null;
+      }
+      return session;
+    };
+
+    const uploadTokenToGDriveTable = async (session: Session) => {
+      console.log("Session user id: ", session.user.id);
+      console.log("Session provider token: ", session.provider_token);
+      console.log("Session refresh token: ", session.provider_refresh_token);
+
+      { // create new scope to reuse `error` name
+        if (!session.provider_token && !session.provider_refresh_token) {
+          throw new Error("Both provider_token and provider_refresh_token are missing")
+        }
+  
+        const { data, error } = await supabase
+          .from("provider_token")
+          .insert({
+            user_id: session.user.id,
+            provider_token: session.provider_token,
+            provider_refresh_token: session.provider_refresh_token,
+            provider: "google"
+          })
+          .select()
+          .single();
+        if (error) {
+          console.log("Error uploading token to auth serv... ", error);
+        } else {
+          console.log("Successfully uploaded!");
+        }
+      }
+    };
+
+    const authUserGDrive = async () => {
+      const session = await getSession();
+      if (session && session.session) {
+        uploadTokenToGDriveTable(session.session);
+      }
+    };
+    authUserGDrive();
+
+  }, []);
+
+  const handleGoogleSignIn = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: "http://localhost:3000/ui/datasources/google",
+        scopes: "https://www.googleapis.com/auth/drive.file",
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent", // The refresh-token gets returned only immediately after consent. It wont
+          // be re-issued on sessionRefresh or Login. For test purposes, I ask consent every time.
+        },
+      },
+    });
+
+    if (error) {
+      console.error("Error signing in", error);
+      return;
+    }
+
+    console.log(data);
+    // Handle the success state
+    console.log("Successfully signed in!");
+  };
+
   // form that asks which connectors they want to set up
   // button that allows them to view/edit other connectors
   //
@@ -79,6 +157,7 @@ export default function NewDatasourcesPage() {
       </div>
       <div className="col-span-2 flex items-center justify-center">
         <button
+          onClick={() => handleGoogleSignIn()}
           disabled={!connector}
           type="button"
           className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
