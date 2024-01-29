@@ -9,17 +9,73 @@ import {
   Common, // General types used throughout the library
 } from 'googleapis';
 import {GaxiosError} from 'googleapis-common';
+import { Session } from "@supabase/supabase-js";
+
 
 export default function GoogleDatasourcePage() {
+
+  useEffect(() => {
+    const getSession = async () => {
+      const { data: session, error } = await supabase.auth.getSession();
+
+      if (error) {
+        console.log("Error fetching session... ", error);
+        return null;
+      }
+      return session;
+    };
+
+    const uploadTokenToGDriveTable = async (session: Session) => {
+      console.log("Session user id: ", session.user.id);
+      console.log("Session provider token: ", session.provider_token);
+      console.log("Session refresh token: ", session.provider_refresh_token);
+
+      // create new scope to reuse `error` name
+      if (!session.provider_token && !session.provider_refresh_token) {
+        console.log(
+          "Both provider_token and provider_refresh_token are missing"
+        );
+      } else {
+        const { data, error } = await supabase
+          .from("provider_token")
+          .insert({
+            user_id: session.user.id,
+            provider_token: session.provider_token,
+            provider_refresh_token: session.provider_refresh_token,
+            provider: "google",
+          })
+          .select()
+          .single();
+        if (error) {
+          console.log("Error uploading token to auth serv... ", error);
+        } else {
+          console.log("Successfully uploaded!");
+        }
+      }
+    };
+
+    const authUserGDrive = async () => {
+      const session = await getSession();
+      if (session && session.session) {
+        try {
+          uploadTokenToGDriveTable(session.session);
+        } catch (e) {
+          console.log(e);
+        }
+      }
+    };
+    authUserGDrive();
+  }, []);
+
+
+
   useEffect(() => {
     const getUserToken = async () => {
       const { data: session, error } = await supabase.auth.getSession();
       if (error) {
         console.log(error);
-        // todo: handle error
-      }
-
-      {
+        // todo: redirect user to login
+      } else {
         const { data, error } = await supabase
           .from("provider_token")
           .select()

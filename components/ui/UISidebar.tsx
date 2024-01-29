@@ -27,14 +27,8 @@ export default function UISidebar() {
     {
       name: "Data Sources",
       href: "/ui/datasources",
-      icon: FolderIcon,
-      current: pathname == "/ui/datasources",
-    },
-    {
-      name: "Data Sets",
-      href: "/ui/datasets",
       icon: CircleStackIcon,
-      current: pathname == "/ui/datasets",
+      current: pathname == "/ui/datasources",
     },
     {
       name: "Chatbots",
