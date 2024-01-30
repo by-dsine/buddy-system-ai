@@ -1,7 +1,4 @@
-"use client";
 import NewDatasourceButton from "@/components/ui/NewDatasourceButton";
-import supabase from "@/utils/supabase/client";
-import { useState } from "react";
 
 const connectors = [
   {
